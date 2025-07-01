@@ -1,4 +1,3 @@
-import { LEETCODE_API_ADDRESS } from "@/constants";
 import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 
