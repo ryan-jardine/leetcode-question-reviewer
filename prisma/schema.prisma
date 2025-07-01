@@ -22,7 +22,7 @@ model User {
 
 model Problem {
   id          Int     @id @default(autoincrement())
-  problem_id  Int     
+  problem_id  Int     @unique
   tags        String[]
   difficulty  Int
   completedBy User[] @relation("CompletedProblems")
