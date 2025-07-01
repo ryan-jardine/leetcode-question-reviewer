@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       const json = await res.json();
       const submissions = json.data.submissionList.submissions;
 
-      // Extract new accepted problems
+      // extract new accepted problems
       for (const sub of submissions) {
         if (
           sub.status === LEETCODE_QUESTION_ACCEPTED_STATUS &&
@@ -69,6 +69,7 @@ export async function GET(req: NextRequest) {
 
           const frontendId = await getFrontendQuestionId(sub.titleSlug);
 
+          //console.log(frontendId, sub.titleSlug);
           if (
             frontendId !== null &&
             !alreadySolved.has(frontendId) &&
@@ -83,10 +84,30 @@ export async function GET(req: NextRequest) {
       offset += LIMIT;
     }
 
-    // we need to insert all the new values into the database
-    console.log("NEW IDS: ", newlyAcceptedProblemIds);
-    return new Response(JSON.stringify({ newlyAcceptedProblemIds }), {
-      status: 200,
+    // pull the actual problems from the database
+    const problems = await prisma.problem.findMany({
+      where: {
+        problem_id: {
+          in: newlyAcceptedProblemIds,
+        },
+      },
+      select: { id: true },
+    });
+
+    const problemPrismaIds = problems.map((p) => ({ id: p.id }));
+
+    // link up the problems with the user
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        completedProblems: {
+          connect: problemPrismaIds,
+        },
+      },
+    });
+
+    return new Response(null, {
+      status: 201,
     });
   } catch (err) {
     console.error(err);
@@ -114,7 +135,7 @@ async function getFrontendQuestionId(
   });
 
   const json = await res.json();
-  return json?.data?.question?.questionId ?? null;
+  return json?.data?.question?.questionFrontendId ?? null;
 }
 
 const validateRequest = (req: NextRequest) => {
