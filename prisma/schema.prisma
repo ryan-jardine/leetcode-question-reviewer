@@ -15,17 +15,17 @@ datasource db {
 }
 
 model User {
-  id                  Int       @id @default(autoincrement())
-  email               String    @unique
-  name                String
-  completed_problems  Problem[] @relation("CompletedByUsers")
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  completedProblems Problem[] @relation("CompletedProblems")
 }
 
 model Problem {
-  id                Int       @id @default(autoincrement())
-  problem_id        Int       
-  tags              String[]
-  difficulty        Int
-  completed_by      User[]    @relation("CompletedByUsers")
+  id          Int     @id @default(autoincrement())
+  problem_id  Int     
+  tags        String[]
+  difficulty  Int
+  completedBy User[] @relation("CompletedProblems")
 }
+
 
